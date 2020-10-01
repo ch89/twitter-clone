@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+	.btn {
+		@apply bg-blue text-white rounded-full font-bold p-3 w-full;
+	}
+
+	.btn:hover {
+		@apply bg-dark-blue;
+	}
+
+	.btn:focus {
+		@apply outline-none;
+	}
+}

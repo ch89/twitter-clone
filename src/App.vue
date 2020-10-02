@@ -8,8 +8,9 @@
 			</div>
 			<div class="border-b-8 p-4 flex items-start">
 				<img src="/images/avatar2.jpg" alt="Avatar" class="w-12 rounded-full mr-4">
-				<form class="flex-1">
-					<textarea class="block w-full mb-4 focus:outline-none" placeholder="What's up doc?"></textarea>
+				<form class="flex-1" @submit.prevent="add">
+					<textarea class="block w-full mb-4 focus:outline-none" placeholder="What's up doc?" v-model="tweet.content"></textarea>
+					<input type="text" class="block w-full mb-4 focus:outline-none" placeholder="Image url" v-model="tweet.image">
 					<div class="flex justify-between items-center">
 						<div class="text-xl text-blue">
 							<a href="#" class="mr-4">
@@ -29,26 +30,50 @@
 					</div>
 				</form>
 			</div>
-			<tweet v-for="(tweet, index) in tweets" :key="index" :tweet="tweet"></tweet>
+			<transition-group name="tweet" tag="div">
+				<tweet v-for="tweet in tweets" :key="tweet.content" :tweet="tweet"></tweet>
+			</transition-group>
 		</div>
-		<div class="w-1/4">Sidebar</div>
+		<sidebar></sidebar>
 	</div>
 </template>
 
 <script>
 	import Navbar from "@/components/Navbar"
 	import Tweet from "@/components/Tweet"
+	import Sidebar from "@/components/Sidebar"
+	import db from "./firebase"
 
 	export default {
-		components: { Navbar, Tweet },
+		components: { Navbar, Tweet, Sidebar },
 		data() {
 			return {
-				tweets: [
-        {src: 'avatar1.jpg', name: 'Elon Musk', handle: '@teslaBoy', time: '20 min', tweet: 'Should I just quarantine on mars??', comments: '1,000', retweets: '550', like: '1,000,003'},
-        {src: 'avatar2.jpg', name: 'Kevin Hart', handle: '@miniRock', time: '55 min', tweet: 'Should me and the rock do another sub-par movie together????', comments: '2,030', retweets: '50', like: '20,003'},
-        {src: 'avatar3.jpg', name: 'Elon Musk', handle: '@teslaBoy', time: '1.4 hr', tweet: 'Haha just made a flame thrower. Shld I sell them?', comments: '100,000', retweets: '1,000,002', like: '5,000,003'},
-        {src: 'avatar4.jpg', name: 'Elon Musk', handle: '@teslaBoy', time: '1.4 hr', tweet: 'Just did something crazyyyyyyy', comments: '100,500', retweets: '1,000,032', like: '5,000,103'}
-      ]
+				tweets: [],
+				tweet: {
+					content: "",
+					image: ""
+				}
+			}
+		},
+		created() {
+			db.collection("tweets").onSnapshot(snapshot => {
+				this.tweets = snapshot.docs.map(doc => doc.data())
+			})
+		},
+		methods: {
+			add() {
+				db.collection("tweets").add({
+					name: "Ludde",
+					handle: "@ludde",
+					content: this.tweet.content,
+					image: this.tweet.image,
+					avatar: "avatar2.jpg"
+				}).then(() => {
+					this.tweet = {
+						content: "",
+						image: ""
+					}
+				})
 			}
 		}
 	}

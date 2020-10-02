@@ -3,7 +3,10 @@ module.exports = {
     // removeDeprecatedGapUtilities: true,
     // purgeLayersByDefault: true,
   },
-  purge: [],
+  purge: [
+    './public/**/*.html',
+    './src/**/*.vue'
+  ],
   theme: {
     extend: {
       colors: {
@@ -11,6 +14,9 @@ module.exports = {
         'dark-blue': '#2795D9',
         'light-blue': '#EFF9FF',
         dark: '#657786'
+      },
+      borderRadius: {
+        xl: "1rem"
       }
     },
   },

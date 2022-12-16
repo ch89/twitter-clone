@@ -1,6 +1,8 @@
 <script setup>
 import { getAuth, signOut } from '@firebase/auth';
 
+const { uid } = getAuth().currentUser
+
 const links = [
     { path: "/", title: "Home", icon: "fa-solid fa-home" },
     { path: "/", title: "Explore", icon: "fa-solid fa-hashtag" },
@@ -8,7 +10,7 @@ const links = [
     { path: "/", title: "Messages", icon: "fa-regular fa-envelope" },
     { path: "/", title: "Bookmarks", icon: "fa-regular fa-bookmark" },
     { path: "/", title: "Lists", icon: "fa-solid fa-clipboard-list" },
-    { path: "/profile", title: "Profile", icon: "fa-regular fa-user" },
+    { path: `/profile/${uid}`, title: "Profile", icon: "fa-regular fa-user" },
     { path: "/", title: "More", icon: "fa-solid fa-ellipsis" },
 ]
 

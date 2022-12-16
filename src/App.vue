@@ -1,12 +1,21 @@
 <script setup>
 import Navbar from './components/Navbar.vue';
 import { ref } from "vue";
-import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, getAdditionalUserInfo } from "firebase/auth";
+import { getFirestore, doc, setDoc } from "firebase/firestore";
 import Sidebar from './components/Sidebar.vue';
 
 const user = ref(null)
 
-let login = e => signInWithPopup(getAuth(), new GoogleAuthProvider)
+let login = async e => {
+  const cred = await signInWithPopup(getAuth(), new GoogleAuthProvider)
+
+  if(getAdditionalUserInfo(cred).isNewUser) {
+    const { uid, displayName, photoURL } = cred.user
+
+    setDoc(doc(getFirestore(), `users/${uid}`), { uid, displayName, photoURL })
+  }
+}
 
 onAuthStateChanged(getAuth(), u => user.value = u)
 </script>

@@ -1,15 +1,17 @@
 <script setup>
 import Tweet from "../components/Tweet.vue"
 import { onBeforeUnmount, ref } from "vue";
-import { getFirestore, collection, serverTimestamp, onSnapshot, query, orderBy, doc, setDoc } from "firebase/firestore";
+import { getFirestore, collection, serverTimestamp, onSnapshot, query, orderBy, doc, setDoc, where } from "firebase/firestore";
 import { getAuth } from "@firebase/auth";
 import { ref as storageRef, getStorage, uploadString, getDownloadURL } from "firebase/storage";
+import { useStore } from "vuex";
 
 const { uid, displayName, photoURL } = getAuth().currentUser
 const tweets = ref([])
 const message = ref("")
 const loading = ref(false)
 const photo = ref(null)
+const store = useStore()
 
 let reader = new FileReader
 reader.addEventListener("load", e => photo.value = reader.result)
@@ -42,18 +44,35 @@ let add = async e => {
   loading.value = false
 }
 
-const unsubscribe = onSnapshot(
-  query(
-    collection(getFirestore(), "tweets"),
-    orderBy("timestamp", "desc")
-  ),
-  snapshot => tweets.value = snapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  }))
+let tweetsSubscription
+
+const followsSubscription = onSnapshot(
+    collection(getFirestore(), `users/${uid}/follows`),
+    snapshot => {
+      const uids = snapshot.docs.map(doc => doc.id)
+
+      store.commit("follows", uids)
+
+      if(tweetsSubscription) tweetsSubscription()
+
+      tweetsSubscription = onSnapshot(
+        query(
+          collection(getFirestore(), "tweets"),
+          where("uid", "in", [uid, ...uids]),
+          orderBy("timestamp", "desc")
+        ),
+        snapshot => tweets.value = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }))
+      )
+    }
 )
 
-onBeforeUnmount(unsubscribe)
+onBeforeUnmount(() => {
+  followsSubscription()
+  tweetsSubscription()
+})
 </script>
 
 <template>

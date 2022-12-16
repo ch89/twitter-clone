@@ -1,11 +1,32 @@
 <script setup>
-const trends = ["Kalmar Slott", "Ironman", "Shopping"]
+import { getAuth } from '@firebase/auth';
+import { collection, deleteDoc, doc, getFirestore, onSnapshot, query, setDoc, where } from '@firebase/firestore';
+import { onBeforeUnmount, ref, computed } from 'vue';
+import { useStore } from "vuex";
 
-const users = [
-    { name: "Kalle Anka satt på en planka och det då va", avatar: "/images/avatar1.jpg" },
-    { name: "Pelle", avatar: "/images/avatar2.jpg" },
-    { name: "Nisse", avatar: "/images/avatar3.jpg" },
-]
+const trends = ["Kalmar Slott", "Ironman", "Shopping"]
+const users = ref([])
+const follows = computed(() => useStore().state.follows)
+const { uid } = getAuth().currentUser
+
+let follow = id => {
+    if(follows.value.includes(id)) {
+        deleteDoc(doc(getFirestore(), `users/${uid}/follows/${id}`))
+    }
+    else {
+        setDoc(doc(getFirestore(), `users/${uid}/follows/${id}`), {})
+    }
+}
+
+const unsubscribe = onSnapshot(
+    query(
+        collection(getFirestore(), "users"),
+        where("uid", "!=", uid)
+    ),
+    snapshot => users.value = snapshot.docs.map(doc => doc.data())
+)
+
+onBeforeUnmount(unsubscribe)
 </script>
 
 <template>
@@ -34,14 +55,16 @@ const users = [
         </div>
         <div class="bg-gray-100 rounded-2xl overflow-hidden">
             <header class="p-4 font-bold">Who to follow</header>
-            <div v-for="{ name, avatar } in users" class="p-4 flex items-center gap-4 hover:bg-gray-200 transition cursor-pointer">
-                <img :src="avatar" class="w-12 h-12 rounded-full object-cover">
+            <router-link :to="{ name: 'profile', params: { uid } }" v-for="{ uid, displayName, photoURL } in users" class="p-4 flex items-center gap-4 hover:bg-gray-200 transition cursor-pointer">
+                <img :src="photoURL" class="w-12 h-12 rounded-full object-cover">
                 <div class="min-w-0">
-                    <h3 class="font-bold truncate">{{ name }}</h3>
+                    <h3 class="font-bold truncate">{{ displayName }}</h3>
                     <p class="text-sm text-gray-500">@handle</p>
                 </div>
-                <button class="bg-blue-400 text-white text-sm px-3 py-1 rounded-full ml-auto">Follow</button>
-            </div>
+                <button @click="follow(uid)" class="border text-sm px-3 py-1 rounded-full ml-auto" :class="follows.includes(uid) ? 'border-gray-300' : 'bg-blue-400 text-white'">
+                    {{ follows.includes(uid) ? "Following" : "Follow" }}
+                </button>
+            </router-link>
             <footer class="p-4 text-sm text-blue-400 hover:bg-gray-200 transition cursor-pointer">Show more</footer>
         </div>
     </div>

@@ -10,7 +10,7 @@ const router = createRouter({
       component: Home
     },
     {
-      path: '/profile',
+      path: '/profile/:uid',
       name: 'profile',
       component: () => import('../views/Profile.vue'),
       children: [

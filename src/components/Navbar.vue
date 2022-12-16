@@ -2,14 +2,14 @@
 import { getAuth, signOut } from '@firebase/auth';
 
 const links = [
-    { title: "Home", icon: "fa-solid fa-home" },
-    { title: "Explore", icon: "fa-solid fa-hashtag" },
-    { title: "Notifications", icon: "fa-regular fa-bell" },
-    { title: "Messages", icon: "fa-regular fa-envelope" },
-    { title: "Bookmarks", icon: "fa-regular fa-bookmark" },
-    { title: "Lists", icon: "fa-solid fa-clipboard-list" },
-    { title: "Profile", icon: "fa-regular fa-user" },
-    { title: "More", icon: "fa-solid fa-ellipsis" },
+    { path: "/", title: "Home", icon: "fa-solid fa-home" },
+    { path: "/", title: "Explore", icon: "fa-solid fa-hashtag" },
+    { path: "/", title: "Notifications", icon: "fa-regular fa-bell" },
+    { path: "/", title: "Messages", icon: "fa-regular fa-envelope" },
+    { path: "/", title: "Bookmarks", icon: "fa-regular fa-bookmark" },
+    { path: "/", title: "Lists", icon: "fa-solid fa-clipboard-list" },
+    { path: "/profile", title: "Profile", icon: "fa-regular fa-user" },
+    { path: "/", title: "More", icon: "fa-solid fa-ellipsis" },
 ]
 
 const { displayName, photoURL } = getAuth().currentUser
@@ -21,7 +21,7 @@ const { displayName, photoURL } = getAuth().currentUser
             <i class="fa-brands fa-twitter"></i>
         </router-link>
         <nav>
-            <router-link to="/" v-for="{ title, icon } in links" class="flex items-center gap-4 p-3 rounded-full hover:bg-gray-100 transition">
+            <router-link :to="path" v-for="{ title, icon, path } in links" class="flex items-center gap-4 p-3 rounded-full hover:bg-gray-100 transition">
                 <i :class="icon" class="fa-fw text-2xl"></i>
                 <p class="text-lg font-semibold">{{ title }}</p>
             </router-link>

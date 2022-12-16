@@ -5,7 +5,7 @@ const { uid } = getAuth().currentUser
 
 const links = [
     { path: "/", title: "Home", icon: "fa-solid fa-home" },
-    { path: "/", title: "Explore", icon: "fa-solid fa-hashtag" },
+    { path: "/explore", title: "Explore", icon: "fa-solid fa-hashtag" },
     { path: "/", title: "Notifications", icon: "fa-regular fa-bell" },
     { path: "/", title: "Messages", icon: "fa-regular fa-envelope" },
     { path: "/", title: "Bookmarks", icon: "fa-regular fa-bookmark" },

@@ -16,6 +16,8 @@ const links = [
   { title: "Likes", name: "likes" },
 ]
 
+console.log("hello")
+
 getCountFromServer(
   query(
     collection(getFirestore(), "tweets"),

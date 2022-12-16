@@ -3,10 +3,13 @@ import { getAuth } from '@firebase/auth';
 import { collection, deleteDoc, doc, getFirestore, onSnapshot, query, setDoc, where } from '@firebase/firestore';
 import { onBeforeUnmount, ref, computed } from 'vue';
 import { useStore } from "vuex";
+import { useRouter } from "vue-router";
 
+const router = useRouter()
+const store = useStore()
 const trends = ["Kalmar Slott", "Ironman", "Shopping"]
 const users = ref([])
-const follows = computed(() => useStore().state.follows)
+const follows = computed(() => store.state.follows)
 const { uid } = getAuth().currentUser
 
 let follow = id => {
@@ -18,7 +21,12 @@ let follow = id => {
     }
 }
 
-const unsubscribe = onSnapshot(
+const followsSubscription = onSnapshot(
+    collection(getFirestore(), `users/${uid}/follows`),
+    snapshot => store.commit("follows", snapshot.docs.map(doc => doc.id))
+)
+
+const usersSubscription = onSnapshot(
     query(
         collection(getFirestore(), "users"),
         where("uid", "!=", uid)
@@ -26,7 +34,10 @@ const unsubscribe = onSnapshot(
     snapshot => users.value = snapshot.docs.map(doc => doc.data())
 )
 
-onBeforeUnmount(unsubscribe)
+onBeforeUnmount(() => {
+    followsSubscription()
+    usersSubscription()
+})
 </script>
 
 <template>
@@ -55,16 +66,16 @@ onBeforeUnmount(unsubscribe)
         </div>
         <div class="bg-gray-100 rounded-2xl overflow-hidden">
             <header class="p-4 font-bold">Who to follow</header>
-            <router-link :to="{ name: 'profile', params: { uid } }" v-for="{ uid, displayName, photoURL } in users" class="p-4 flex items-center gap-4 hover:bg-gray-200 transition cursor-pointer">
+            <div @click="router.push(`/profile/${uid}`)" v-for="{ uid, displayName, photoURL } in users" class="p-4 flex items-center gap-4 hover:bg-gray-200 transition cursor-pointer">
                 <img :src="photoURL" class="w-12 h-12 rounded-full object-cover">
                 <div class="min-w-0">
                     <h3 class="font-bold truncate">{{ displayName }}</h3>
                     <p class="text-sm text-gray-500">@handle</p>
                 </div>
-                <button @click="follow(uid)" class="border text-sm px-3 py-1 rounded-full ml-auto" :class="follows.includes(uid) ? 'border-gray-300' : 'bg-blue-400 text-white'">
+                <button @click.stop="follow(uid)" class="border text-sm px-3 py-1 rounded-full ml-auto" :class="follows.includes(uid) ? 'border-gray-300' : 'bg-blue-400 text-white'">
                     {{ follows.includes(uid) ? "Following" : "Follow" }}
                 </button>
-            </router-link>
+            </div>
             <footer class="p-4 text-sm text-blue-400 hover:bg-gray-200 transition cursor-pointer">Show more</footer>
         </div>
     </div>

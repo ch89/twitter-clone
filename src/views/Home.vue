@@ -1,6 +1,6 @@
 <script setup>
 import Tweet from "../components/Tweet.vue"
-import { onBeforeUnmount, ref } from "vue";
+import { onBeforeUnmount, ref, watchEffect } from "vue";
 import { getFirestore, collection, serverTimestamp, onSnapshot, query, orderBy, doc, setDoc, where } from "firebase/firestore";
 import { getAuth } from "@firebase/auth";
 import { ref as storageRef, getStorage, uploadString, getDownloadURL } from "firebase/storage";
@@ -44,35 +44,25 @@ let add = async e => {
   loading.value = false
 }
 
-let tweetsSubscription
+let unsubscribe
 
-const followsSubscription = onSnapshot(
-    collection(getFirestore(), `users/${uid}/follows`),
-    snapshot => {
-      const uids = snapshot.docs.map(doc => doc.id)
-
-      store.commit("follows", uids)
-
-      if(tweetsSubscription) tweetsSubscription()
-
-      tweetsSubscription = onSnapshot(
-        query(
-          collection(getFirestore(), "tweets"),
-          where("uid", "in", [uid, ...uids]),
-          orderBy("timestamp", "desc")
-        ),
-        snapshot => tweets.value = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }))
-      )
-    }
-)
-
-onBeforeUnmount(() => {
-  followsSubscription()
-  tweetsSubscription()
+watchEffect(() => {
+  if(unsubscribe) unsubscribe()
+  
+  unsubscribe = onSnapshot(
+    query(
+      collection(getFirestore(), "tweets"),
+      where("uid", "in", [uid, ...store.state.follows]),
+      orderBy("timestamp", "desc")
+    ),
+    snapshot => tweets.value = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }))
+  )
 })
+
+onBeforeUnmount(() => unsubscribe())
 </script>
 
 <template>

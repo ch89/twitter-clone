@@ -10,6 +10,11 @@ const router = createRouter({
       component: Home
     },
     {
+      path: "/explore",
+      name: "explore",
+      component: () => import("../views/Explore.vue")
+    },
+    {
       path: '/profile/:uid',
       name: 'profile',
       component: () => import('../views/Profile.vue'),

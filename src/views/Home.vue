@@ -101,13 +101,3 @@ onBeforeUnmount(() => unsubscribe())
     <tweet v-for="tweet in tweets" :key="tweet.id" :tweet="tweet"></tweet>
   </div>
 </template>
-
-<style scoped>
-  form:has(:invalid) [type="submit"] {
-    @apply opacity-50 cursor-not-allowed;
-  }
-
-  .loading {
-    @apply text-transparent cursor-not-allowed grid place-items-center after:absolute after:w-4 after:h-4 after:border-2 after:border-white after:rounded-full after:border-r-transparent after:border-t-transparent after:animate-spin;
-  }
-</style>

@@ -30,3 +30,17 @@ onAuthStateChanged(getAuth(), u => user.value = u)
     <button @click="login">Login</button>
   </div>
 </template>
+
+<style>
+  .avatar {
+    @apply w-12 h-12 rounded-full object-cover;
+  }
+
+  form:has(:invalid) [type="submit"] {
+    @apply opacity-50 cursor-not-allowed;
+  }
+
+  .loading {
+    @apply !text-transparent cursor-not-allowed grid place-items-center after:absolute after:w-4 after:h-4 after:border-2 after:border-white after:rounded-full after:border-r-transparent after:border-t-transparent after:animate-spin;
+  }
+</style>
